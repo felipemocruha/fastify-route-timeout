@@ -11,7 +11,7 @@ A Fastify plugin to automatically set timeouts for routes. If a route takes long
 ## Installation
 
 ```bash
-npm install @felipemocruha/fastify-route-timeout
+npm install --save @felipemocruha/fastify-route-timeout
 ```
 
 ## Usage
@@ -61,6 +61,32 @@ server.register(RequestTimeoutPlugin, {
     messages: [{ message: "Custom timeout message" }],
   },
 });
+```
+
+### Dynamic overriding
+
+You can override dynamically the timeout for a given route. This can be useful for frameworks that use decorators to modify the handler.
+
+Note: the timeout handler is set on `preHandler` hook, you need to override it sooner in the lifecycle (e.g. `onRequest`).
+
+```javascript
+import { overrideTimeout } from "@felipemocruha/fastify-route-timeout";
+
+server.register(RequestTimeoutPlugin, {
+  defaultTimeoutMillis: 5000,
+});
+
+const override = async (req: FastifyRequest, rep: FastifyReply) => {
+  overrideTimeout(1000);
+};
+
+server.get(
+  "/example",
+  { onRequest: override },
+  async (req: FastifyRequest, rep: FastifyReply) => {
+    return { success: true };
+  },
+);
 ```
 
 ### Error Handling

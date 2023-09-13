@@ -3,6 +3,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 const { requestContext } = require("@fastify/request-context");
 
 const TIMEOUT = "FASTIFY_ROUTE_TIMEOUT";
+const OVERRIDE_TIMEOUT = "FASTIFY_ROUTE_OVERRIDE_TIMEOUT";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
 
@@ -27,8 +28,14 @@ export class FastifyRouteTimeoutError extends Error {
   }
 }
 
+export const overrideTimeout = (millis: number) => {
+  requestContext.set(OVERRIDE_TIMEOUT, millis);
+};
+
 export const RequestTimeoutPlugin = wrapper(
   async (server: FastifyInstance, options: Options) => {
+    await server.register(require("@fastify/request-context"));
+
     if (!options.timeoutPayload) {
       options.timeoutPayload = defaultTimeoutPayload;
     }
@@ -42,7 +49,7 @@ export const RequestTimeoutPlugin = wrapper(
     };
 
     server.addHook(
-      "onRequest",
+      "preHandler",
       async (request: FastifyRequest, reply: FastifyReply) => {
         let timeoutMillis = options.defaultTimeoutMillis;
 
@@ -56,6 +63,12 @@ export const RequestTimeoutPlugin = wrapper(
         }
 
         try {
+          const dynamicTimeout = requestContext.get(OVERRIDE_TIMEOUT);
+          if (dynamicTimeout) {
+            console.log(dynamicTimeout);
+            timeoutMillis = dynamicTimeout;
+          }
+
           const timeout = setTimeout(() => {
             reply.status(504).send(options.timeoutPayload);
           }, timeoutMillis);
