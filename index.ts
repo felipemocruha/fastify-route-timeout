@@ -47,8 +47,8 @@ export const RequestTimeoutPlugin = wrapper(
         let timeoutMillis = options.defaultTimeoutMillis;
 
         if (options.routes) {
-          const route = options.routes[request.url];
-          const method = request.method as Method;
+          const route = options.routes[request.routeOptions.url];
+          const method = request.routeOptions.method as Method;
 
           if (route && route[method]) {
             timeoutMillis = route[method] ?? timeoutMillis;
