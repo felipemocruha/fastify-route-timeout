@@ -20,7 +20,7 @@ npm install @felipemocruha/fastify-route-timeout
 
 ```javascript
 import fastify from "fastify";
-import { RequestTimeoutPlugin } from "your-package-name";
+import { RequestTimeoutPlugin } from "@felipemocruha/fastify-route-timeout";
 
 const server = fastify();
 
