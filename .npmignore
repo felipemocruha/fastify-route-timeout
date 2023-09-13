@@ -1,0 +1,4 @@
+coverage
+index.ts
+index.spec.ts
+fastify-route-timeout.d.ts

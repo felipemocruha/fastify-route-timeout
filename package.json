@@ -11,7 +11,7 @@
     "lint:fix": "eslint --fix --ext .",
     "check": "yarn lint:check && yarn prettier:check",
     "fix": "yarn lint:fix && yarn prettier:fix",
-    "build": "tsc && tsc-alias",
+    "build": "tsc",
     "test": "jest --detectOpenHandles",
     "coverage": "jest --coverage --coverageReporters=text-summary",
     "test-ci": "jest --runInBand --forceExit --coverage --config jest.config.js"
