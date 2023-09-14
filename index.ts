@@ -1,5 +1,5 @@
-import wrapper from "fastify-plugin";
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+const wrapper = require("fastify-plugin");
+const { FastifyInstance, FastifyReply, FastifyRequest } = require("fastify");
 const { requestContext } = require("@fastify/request-context");
 
 const TIMEOUT = "FASTIFY_ROUTE_TIMEOUT";
@@ -33,7 +33,7 @@ export const overrideTimeout = (millis: number) => {
 };
 
 export const RequestTimeoutPlugin = wrapper(
-  async (server: FastifyInstance, options: Options) => {
+  async (server: typeof FastifyInstance, options: Options) => {
     await server.register(require("@fastify/request-context"));
 
     if (!options.timeoutPayload) {
@@ -50,7 +50,7 @@ export const RequestTimeoutPlugin = wrapper(
 
     server.addHook(
       "preHandler",
-      async (request: FastifyRequest, reply: FastifyReply) => {
+      async (request: typeof FastifyRequest, reply: typeof FastifyReply) => {
         let timeoutMillis = options.defaultTimeoutMillis;
 
         if (options.routes) {
@@ -82,7 +82,11 @@ export const RequestTimeoutPlugin = wrapper(
 
     server.addHook(
       "onSend",
-      async (request: FastifyRequest, reply: FastifyReply, payload: any) => {
+      async (
+        request: typeof FastifyRequest,
+        reply: typeof FastifyReply,
+        payload: any,
+      ) => {
         try {
           close();
           return payload;
