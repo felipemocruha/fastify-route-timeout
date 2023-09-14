@@ -1,20 +1,16 @@
-import { describe, expect, test } from "@jest/globals";
-import Fastify, {
-  FastifyInstance,
-  FastifyReply,
-  FastifyRequest,
-} from "fastify";
-import {
+const { describe, expect, test } = require("@jest/globals");
+const Fastify = require("fastify");
+const {
   RequestTimeoutPlugin,
   FastifyRouteTimeoutError,
   overrideTimeout,
-} from ".";
+} = require("./");
 const { requestContext } = require("@fastify/request-context");
 
-const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 describe("RequestTimeoutPlugin", () => {
-  let server: FastifyInstance;
+  let server;
 
   beforeEach(async () => {
     server = Fastify();
@@ -27,7 +23,7 @@ describe("RequestTimeoutPlugin", () => {
   test("should timeout when function takes longer than defaultTimeout", async () => {
     await server.register(RequestTimeoutPlugin, { defaultTimeoutMillis: 10 });
 
-    server.get("/test", async (req: FastifyRequest, rep: FastifyReply) => {
+    server.get("/test", async (req, rep) => {
       await sleep(100);
       return { success: true };
     });
@@ -44,7 +40,7 @@ describe("RequestTimeoutPlugin", () => {
   test("should not timeout when function does not take longer than defaultTimeout", async () => {
     await server.register(RequestTimeoutPlugin, { defaultTimeoutMillis: 100 });
 
-    server.get("/test", async (req: FastifyRequest, rep: FastifyReply) => {
+    server.get("/test", async (req, rep) => {
       await sleep(10);
       return { success: true };
     });
@@ -64,7 +60,7 @@ describe("RequestTimeoutPlugin", () => {
       routes: { "/test": { GET: 10 } },
     });
 
-    server.get("/test", async (req: FastifyRequest, rep: FastifyReply) => {
+    server.get("/test", async (req, rep) => {
       await sleep(100);
       return { success: true };
     });
@@ -84,13 +80,10 @@ describe("RequestTimeoutPlugin", () => {
       routes: { "/test/:id/case/:id2": { GET: 10 } },
     });
 
-    server.get(
-      "/test/:id/case/:id2",
-      async (req: FastifyRequest, rep: FastifyReply) => {
-        await sleep(100);
-        return { success: true };
-      },
-    );
+    server.get("/test/:id/case/:id2", async (req, rep) => {
+      await sleep(100);
+      return { success: true };
+    });
 
     const response = await server.inject({
       method: "GET",
@@ -107,14 +100,14 @@ describe("RequestTimeoutPlugin", () => {
       routes: { "/test/:id/case/:id2": { GET: 4000 } },
     });
 
-    const override = async (req: FastifyRequest, rep: FastifyReply) => {
+    const override = async (req, rep) => {
       overrideTimeout(10);
     };
 
     server.get(
       "/test/:id/case/:id2",
       { onRequest: override },
-      async (req: FastifyRequest, rep: FastifyReply) => {
+      async (req, rep) => {
         await sleep(1000);
         return { success: true };
       },
@@ -135,7 +128,7 @@ describe("RequestTimeoutPlugin", () => {
       routes: { "/test": { GET: 100 } },
     });
 
-    server.get("/test", async (req: FastifyRequest, rep: FastifyReply) => {
+    server.get("/test", async (req, rep) => {
       await sleep(10);
       return { success: true };
     });
@@ -155,7 +148,7 @@ describe("RequestTimeoutPlugin", () => {
       routes: { "/another-test": { GET: 100 } },
     });
 
-    server.get("/test", async (req: FastifyRequest, rep: FastifyReply) => {
+    server.get("/test", async (req, rep) => {
       await sleep(100);
       return { success: true };
     });
@@ -176,7 +169,7 @@ describe("RequestTimeoutPlugin", () => {
       throw new Error("exception");
     });
 
-    server.get("/test", async (req: FastifyRequest, rep: FastifyReply) => {
+    server.get("/test", async (req, rep) => {
       return { success: true };
     });
 
